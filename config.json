@@ -1,0 +1,8 @@
+{
+  "BOT": {
+    "TOKEN": "5759265239:AAHV3FXLHD2a-ex0YTreo1ShSECUeJcT3h4",
+    "ADMINS": [381252111]
+  },
+  "DATABASE": "postgres:postgres@localhost:5432/impuls"
+
+}
