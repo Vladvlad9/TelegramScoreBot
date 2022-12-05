@@ -1,3 +1,3 @@
-from .registration import dp
+from .mainPage import dp
 
 __all__ = ["dp"]
