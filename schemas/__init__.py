@@ -1,2 +1,4 @@
 from .config import ConfigSchema
-from .applicant_form import ApplicantFormSchema, ApplicantFormInDBSchema
+from .pizzaMenu import PizzaMenuSchemaInDBSchema, PizzaMenuSchema
+from .typeSchemas import TypeInDBSchema, TypeSchema
+from .sizeShemas import SizeInDBSchema, SizeSchema

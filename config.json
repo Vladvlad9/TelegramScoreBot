@@ -3,6 +3,6 @@
     "TOKEN": "5184590420:AAGzmQUIjU_jT4Y2qKssQgCMD76SlUpRo0k",
     "ADMINS": [381252111]
   },
-  "DATABASE": "postgres:postgres@localhost:5432/impuls"
+  "DATABASE": "postgres:postgres@localhost:5432/pizzaShop"
 
 }
