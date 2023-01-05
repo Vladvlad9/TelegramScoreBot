@@ -4,7 +4,8 @@ from pydantic import BaseModel, Field
 
 class BasketSchema(BaseModel):
 
-    pizza_id: int
+    parent_id: int
+    menu_id: int
     count: int
     user_id: int
 

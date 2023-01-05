@@ -45,7 +45,8 @@ class Basket(Base):
     __tablename__: str = "baskets"
     
     id = Column(Integer, primary_key=True)
-    pizza_id = Column(Integer, default=1)
+    parent_id = Column(Integer, default=1)
+    menu_id = Column(Integer, default=1)
     count = Column(Integer, default=1)
     user_id = Column(BigInteger(), default=1)
 

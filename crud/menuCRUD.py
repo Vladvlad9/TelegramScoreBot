@@ -34,24 +34,24 @@ class CRUDPizzaMenu(object):
 
     @staticmethod
     @create_async_session
-    async def get(pizzaMenu_id: int = None,
+    async def get(pizzaMenu_id: int,
+                  parent_id: int,
                   session: AsyncSession = None) -> PizzaMenuSchemaInDBSchema | None:
         pizzas = await session.execute(
             select(Menu)
-            .where(Menu.id == pizzaMenu_id)
+            .where(Menu.id == pizzaMenu_id, and_(Menu.parent_id == parent_id))
         )
         if pizzas_menu := pizzas.first():
             return PizzaMenuSchemaInDBSchema(**pizzas_menu[0].__dict__)
 
     @staticmethod
     @create_async_session
-    async def get_all(position: bool = None,
+    async def get_all(position_id: int = None,
                       session: AsyncSession = None) -> list[PizzaMenuSchemaInDBSchema]:
-        if position:
-            position = None
+        if position_id:
             pizzas = await session.execute(
                 select(Menu)
-                .where(Menu.parent_id == position)
+                .where(Menu.parent_id == position_id)
             )
         else:
             pizzas = await session.execute(
