@@ -36,17 +36,18 @@ class CRUDBasket(object):
     @create_async_session
     async def get(basket_id: int = None,
                   user_id: int = None,
-                  product_id: int = None,
+                  parent_id: int = None,
+                  menu_id: int = None,
                   session: AsyncSession = None) -> BasketInDBSchema | None:
         if user_id:
             baskets = await session.execute(
                 select(Basket)
                 .where(Basket.user_id == user_id)
             )
-        if product_id:
+        if parent_id:
             baskets = await session.execute(
                 select(Basket)
-                .where(Basket.pizza_id == product_id)
+                .where(Basket.parent_id == parent_id, and_(Basket.menu_id == menu_id))
             )
         else:
             baskets = await session.execute(

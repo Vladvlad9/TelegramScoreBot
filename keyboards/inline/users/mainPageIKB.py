@@ -19,11 +19,13 @@ MainPage_CB = CallbackData("MainPage", "target", "action", "id", "editId", "newI
 class Main:
 
     @staticmethod
-    async def back_ikb(target: str, action: str = None):
+    async def back_ikb(target: str, menu_id: int, parent_id: int, action: str = None):
         return InlineKeyboardMarkup(
             inline_keyboard=[
                 [
-                    InlineKeyboardButton(text="◀️ Назад", callback_data=MainPage_CB.new(target, action, 0, 0, 0))
+                    InlineKeyboardButton(text="◀️ Назад", callback_data=MainPage_CB.new(target, action, parent_id,
+                                                                                        menu_id, 1)
+                                         )
                 ]
             ]
         )
@@ -82,26 +84,6 @@ class Main:
             urlkb.add(InlineKeyboardButton(text='Назад', callback_data=MainPage_CB.new("MainMenu", 0, 0, 0, 0)))
         return urlkb
 
-        # right_ikb = [
-        #     InlineKeyboardButton(text=menu_name, callback_data=MainPage_CB.new(target, menu_target, 0, 0))
-        #     for menu_name, menu_target in data_menu.items()
-        # ]
-        #
-        # left_ikb = [
-        #     InlineKeyboardButton(text=menu_name, callback_data=MainPage_CB.new(target, menu_target, 0, 0))
-        #     for menu_name, menu_target in data_menu_two.items()
-        # ]
-        #
-        # return InlineKeyboardMarkup(
-        #     inline_keyboard=[
-        #         right_ikb,
-        #         left_ikb,
-        #         [
-        #             InlineKeyboardButton(text="◀️ Назад", callback_data=MainPage_CB.new(target_back, 0, 0, 0))
-        #         ]
-        #     ]
-        # )
-
     @staticmethod  # Выбор действия при нажатии на меню
     async def search_ikb(target_back: str, position_id: int) -> InlineKeyboardMarkup:
         data_search = {
@@ -127,7 +109,7 @@ class Main:
                                     page: int = 0,
                                     count: int = 1,
                                     nextCount: bool = False) -> InlineKeyboardMarkup:
-        pizza_id = await CRUDPizzaMenu.get(pizzaMenu_id=pizza_id, parent_id=parent_id)
+        pizza_id = await CRUDPizzaMenu.get(menu_id=pizza_id, parent_id=parent_id)
 
         size_id = await CRUDSize.get(size_id=pizza_id.size_id)
         type_id = await CRUDType.get(type_id=pizza_id.type_id)
@@ -194,7 +176,7 @@ class Main:
                                              callback_data=MainPage_CB.new(0, 0, count, pizza_id.id, parent_id)
                                              ),
                         InlineKeyboardButton(text=f"➕",
-                                             callback_data=MainPage_CB.new("DescriptionPizza", "CountPizza", prev_count,
+                                             callback_data=MainPage_CB.new("DescriptionPizza", "CountPizza", next_count,
                                                                            pizza_id.id,
                                                                            parent_id)
                                              )
@@ -208,7 +190,7 @@ class Main:
                     ],
                     [
                         InlineKeyboardButton(text=f"◀️ Назад",
-                                             callback_data=MainPage_CB.new("Catalog", target_back, 0, 0)
+                                             callback_data=MainPage_CB.new("Catalog", "BackCatalog", 0, 0, 0)
                                              )
                     ]
                 ]
@@ -237,7 +219,7 @@ class Main:
                                              callback_data=MainPage_CB.new(0, 0, count, pizza_id.id, parent_id)
                                              ),
                         InlineKeyboardButton(text=f"➕",
-                                             callback_data=MainPage_CB.new("DescriptionPizza", "CountPizza", prev_count,
+                                             callback_data=MainPage_CB.new("DescriptionPizza", "CountPizza", next_count,
                                                                            pizza_id.id,
                                                                            parent_id)
                                              )
@@ -245,7 +227,7 @@ class Main:
                     [
                         InlineKeyboardButton(text=f"←",
                                              callback_data=MainPage_CB.new("DescriptionPizza",
-                                                                           "PaginationPizza", prev_page, parent_id, 0)
+                                                                           "PaginationPizza", prev_page, parent_id, parent_id)
                                              ),
                         InlineKeyboardButton(text=f"☰",
                                              callback_data=MainPage_CB.new("DescriptionPizza",
@@ -253,19 +235,19 @@ class Main:
                                              ),
                         InlineKeyboardButton(text=f"→",
                                              callback_data=MainPage_CB.new("DescriptionPizza",
-                                                                           "PaginationPizza", next_page, parent_id, 0)
+                                                                           "PaginationPizza", next_page, parent_id, parent_id)
                                              )
                     ],
                     [
                         InlineKeyboardButton(text=f"◀️ Назад",
-                                             callback_data=MainPage_CB.new("Catalog", target_back, 0, 0, 0)
+                                             callback_data=MainPage_CB.new("Catalog", "BackCatalog", 0, 0, 0)
                                              )
                     ]
                 ]
             )
 
     @staticmethod  # Бургер меню (дополнительно)
-    async def additionally_ikb(target_back: str, pizza_id: int, count: int) -> InlineKeyboardMarkup:
+    async def additionally_ikb(target_back: str, pizza_id: int, count: int, parent_id: int) -> InlineKeyboardMarkup:
         """
 
         :return:
@@ -280,7 +262,7 @@ class Main:
                                                          callback_data=MainPage_CB.new("DescriptionPizza",
                                                                                        additionally_target,
                                                                                        pizza_id,
-                                                                                       count, 0
+                                                                                       count, parent_id
                                                                                        )
                                                          )
                                 ] for additionally, additionally_target in data_additionally.items()
@@ -330,7 +312,7 @@ class Main:
                 [
                     InlineKeyboardButton(text=basket,
                                          callback_data=MainPage_CB.new(basket_menu['target'], basket_menu['target'],
-                                                                       0, 0)
+                                                                       0, 0, 0)
                                          )
                 ] for basket, basket_menu in data_basket.items()
             ]
@@ -359,6 +341,13 @@ class Main:
                                                       reply_markup=await Main.search_ikb(target_back="BackPizza",
                                                                                          position_id=get_id))
 
+                    elif data.get("action") == "BackCatalog":
+                        await callback.message.delete()
+                        await callback.message.answer(text="Меню",
+                                                      reply_markup=await Main.menu_ikb(target="Catalog",
+                                                                                       target_back="MainMenu")
+                                                      )
+
                 elif data.get('target') == "Filter":
                     await callback.message.delete()
                     await callback.message.answer(text="Выберите параметры поиска",
@@ -367,20 +356,27 @@ class Main:
                 elif data.get('target') == "DescriptionPizza":
 
                     if data.get('action') == "ShowAll":
-                        get_position_id = int(data.get('id'))
-                        data_pizzaMenu = await CRUDPizzaMenu.get_all(position_id=get_position_id)
-                        await callback.message.delete()
-                        # await callback.message.answer_photo(photo=photo.decode('UTF-8'))
-                        await callback.message.answer_photo(photo=data_pizzaMenu[0].photo.decode('UTF-8'),
-                                                            caption=f"Название: <b>{data_pizzaMenu[0].name}</b>\n\n"
-                                                                    f"Описание: <b>{data_pizzaMenu[0].description}</b>",
-                                                            reply_markup=await Main.description_pizza_ikb(
-                                                                target_back="Pizza",
-                                                                pizza_id=int(data_pizzaMenu[0].id, ),
-                                                                count=1,
-                                                                parent_id=get_position_id
-                                                            ),
-                                                            parse_mode="HTML")
+                        try:
+                            get_position_id = int(data.get('id'))
+                            data_pizzaMenu = await CRUDPizzaMenu.get_all(position_id=get_position_id)
+                            await callback.message.delete()
+                            # await callback.message.answer_photo(photo=photo.decode('UTF-8'))
+                            await callback.message.answer_photo(photo=data_pizzaMenu[0].photo.decode('UTF-8'),
+                                                                caption=f"Название: <b>{data_pizzaMenu[0].name}</b>\n\n"
+                                                                        f"Описание: <b>{data_pizzaMenu[0].description}</b>",
+                                                                reply_markup=await Main.description_pizza_ikb(
+                                                                    target_back="Pizza",
+                                                                    pizza_id=int(data_pizzaMenu[0].id, ),
+                                                                    count=1,
+                                                                    parent_id=get_position_id
+                                                                ),
+                                                                parse_mode="HTML")
+                        except Exception as e:
+                            print(e)
+                            await callback.message.edit_text(text="Главная страница",
+                                                             reply_markup=await Main.start_ikb()
+                                                             )
+
                     elif data.get("action") == "PaginationPizza":
                         page = int(data.get('id'))
                         get_parent_id = int(data.get('editId'))
@@ -403,16 +399,17 @@ class Main:
                         # Сделать динамически pizza_id
 
                         current_pizza_id = int(data.get("id"))
-                        count_pizza = int(data.get("editId"))
-                        parent_pizza = int(data.get("newId"))
-                        pizza_id = await CRUDPizzaMenu.get(pizzaMenu_id=current_pizza_id, parent_id=parent_pizza)
+                        count_id = int(data.get("editId"))
+                        parent_id = int(data.get("newId"))
+                        pizza_id = await CRUDPizzaMenu.get(menu_id=current_pizza_id, parent_id=parent_id)
                         await callback.message.delete()
                         await callback.message.answer(text=f"Вы выбрали\n"
                                                            f"{pizza_id.name}\n\n"
-                                                           f"Количество: {count_pizza}",
+                                                           f"Количество: {count_id}",
                                                       reply_markup=await Main.additionally_ikb(target_back="ShowAll",
                                                                                                pizza_id=pizza_id.id,
-                                                                                               count=count_pizza)
+                                                                                               count=count_id,
+                                                                                               parent_id=parent_id)
                                                       )
 
                     elif data.get("action") == "CountPizza":
@@ -424,7 +421,7 @@ class Main:
                         else:
                             count = int(data.get('id'))
 
-                        pizza = await CRUDPizzaMenu.get(pizzaMenu_id=page, parent_id=parent_id)
+                        pizza = await CRUDPizzaMenu.get(menu_id=page, parent_id=parent_id)
                         await callback.message.delete()
                         await callback.message.answer_photo(photo=pizza.photo.decode('UTF-8'),
                                                             caption=f"Название: <b>{pizza.name}</b>\n\n"
@@ -440,21 +437,25 @@ class Main:
                                                             parse_mode="HTML")
 
                     elif data.get("action") == "AddBasket":
-                        current_pizza_id = int(data.get("id"))
-                        count_pizza = int(data.get("editId"))
+                        current_menu_id = int(data.get("id"))
+                        count_product = int(data.get("editId"))
+                        parent_id = int(data.get("newId"))
 
-                        get_product = await CRUDBasket.get(product_id=current_pizza_id)
+                        get_product = await CRUDBasket.get(parent_id=parent_id, menu_id=current_menu_id)
                         if get_product:
-                            get_product.count = count_pizza
+                            get_product.count = count_product
                             await CRUDBasket.update(basket=get_product)
                         else:
-                            await CRUDBasket.add(basket=BasketSchema(pizza_id=current_pizza_id,
-                                                                     count=count_pizza,
+                            await CRUDBasket.add(basket=BasketSchema(menu_id=current_menu_id,
+                                                                     parent_id=parent_id,
+                                                                     count=count_product,
                                                                      user_id=int(callback.from_user.id))
                                                  )
                         await callback.message.edit_text("Вы успешно добавили товар в Корзину",
                                                          reply_markup=await Main.back_ikb(target="DescriptionPizza",
-                                                                                          action="ShowAll"))
+                                                                                          action="ShowAll",
+                                                                                          menu_id=current_menu_id,
+                                                                                          parent_id=parent_id))
 
                     elif data.get("action") == "BackPizza":
                         await callback.message.edit_text(text="Меню",
@@ -467,11 +468,10 @@ class Main:
                         result = "🛒 Список товаров в корзине:\n\n"
 
                         for value in get_basket:
-                            a = dict(value)
-                            pizza = await CRUDPizzaMenu.get(pizzaMenu_id=a['pizza_id'])
+                            pizza = await CRUDPizzaMenu.get(menu_id=value.menu_id, parent_id=value.parent_id)
                             result += f"Название - {pizza.name}\n" \
-                                      f"Колличество - {a['count']}\n" \
-                                      f"Цена - {float(pizza.price) * float(a['count'])}\n" \
+                                      f"Колличество - {value.count}\n" \
+                                      f"Цена - {float(pizza.price) * float(value.count)}\n" \
                                       f"{'_' * 25}\n\n"
 
                         await callback.message.edit_text(text=result,
@@ -479,7 +479,10 @@ class Main:
                     else:
                         await callback.message.edit_text("У вас в корзине отсутствуют товары",
                                                          reply_markup=await Main.back_ikb(target="MainMenu",
-                                                                                          action=str(0)))
+                                                                                          action=str(0),
+                                                                                          parent_id=0,
+                                                                                          menu_id=0)
+                                                         )
 
                 elif data.get("target") == "Contacts":
 
@@ -492,7 +495,9 @@ class Main:
 
                     await callback.message.edit_text(text=f"Способ связи: {text}",
                                                      reply_markup=await Main.back_ikb(target="MainMenu",
-                                                                                      action=str(0)),
+                                                                                      action=str(0),
+                                                                                      parent_id=0,
+                                                                                      menu_id=0),
                                                      parse_mode="HTML",
                                                      disable_web_page_preview=True
                                                      )
