@@ -31,6 +31,16 @@ class Size(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(Text, nullable=False)
+
+
+class Basket(Base):
+    __tablename__: str = "baskets"
+    
+    id = Column(Integer, primary_key=True)
+    pizza_id = Column(Integer, nullable=False)
+    count = Column(Integer, nullable=True)
+    user_id = Column(Integer, nullable=False)
+
     
 
 
