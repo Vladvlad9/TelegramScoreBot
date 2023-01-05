@@ -3,6 +3,13 @@
     "TOKEN": "5157144703:AAHShX89ccCcVYqTszyyK5N8BKatoKRE-6w",
     "ADMINS": [381252111]
   },
+  "SUPPORT": {
+    "PHONE": "+375259379992",
+    "INSTAGRAM": "tytyty",
+    "EMAIL": "zazaza9@gmail.com",
+    "DISCORD": "123",
+    "TELEGRAM": "ulad_islau"
+  },
   "DATABASE": "postgres:postgres@localhost:5432/pizzaShop"
 
 }

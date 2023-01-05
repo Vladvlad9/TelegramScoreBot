@@ -7,16 +7,24 @@ from sqlalchemy.dialects.postgresql import BYTEA
 Base = declarative_base()
 
 
-class PizzaMenu(Base):
-    __tablename__: str = "pizza_menu"
+class Menu(Base):
+    __tablename__: str = "menu"
 
     id = Column(Integer, primary_key=True)
+    parent_id = Column(Integer)
     name = Column(Text)
     photo = Column(BYTEA)
     type_id = Column(Integer, ForeignKey("types.id", ondelete="NO ACTION"))
     price = Column(Text)
     size_id = Column(Integer, ForeignKey("sizes.id", ondelete="NO ACTION"))
     description = Column(Text)
+
+
+class PositionMenu(Base):
+    __tablename__ = 'position_menu'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(Text)
 
 
 class Type(Base):
@@ -37,9 +45,9 @@ class Basket(Base):
     __tablename__: str = "baskets"
     
     id = Column(Integer, primary_key=True)
-    pizza_id = Column(Integer, nullable=False)
-    count = Column(Integer, nullable=True)
-    user_id = Column(Integer, nullable=False)
+    pizza_id = Column(Integer, default=1)
+    count = Column(Integer, default=1)
+    user_id = Column(BigInteger(), default=1)
 
     
 

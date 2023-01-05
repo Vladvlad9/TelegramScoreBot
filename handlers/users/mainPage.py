@@ -3,10 +3,9 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.dispatcher.storage import FSMContext
 from aiogram.utils.exceptions import BadRequest
 
-from crud.pizzaMenuCRUD import CRUDPizzaMenu
+from crud.menuCRUD import CRUDPizzaMenu
 from keyboards.inline.users.mainPageIKB import MainPage_CB, Main
 from loader import dp, bot
-from models import PizzaMenu
 from schemas import PizzaMenuSchema
 from states.users import MainState
 
@@ -59,6 +58,7 @@ async def load_price(message: types.Message, state: FSMContext):
     asd = await state.get_data()
     asd['type_id'] = 1
     asd['size_id'] = 1
+    asd['parent_id'] = 2
 
     a = await CRUDPizzaMenu.add(pizzaMenu=PizzaMenuSchema(**asd))
     await state.finish()

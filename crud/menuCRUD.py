@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select, update, delete, and_
 
-from models import PizzaMenu, create_async_session
+from models import Menu, create_async_session
 from schemas import PizzaMenuSchemaInDBSchema, PizzaMenuSchema
 
 
@@ -11,7 +11,7 @@ class CRUDPizzaMenu(object):
     @staticmethod
     @create_async_session
     async def add(pizzaMenu: PizzaMenuSchema, session: AsyncSession = None) -> PizzaMenuSchemaInDBSchema | None:
-        pizzas = PizzaMenu(
+        pizzas = Menu(
             **pizzaMenu.dict()
         )
         session.add(pizzas)
@@ -27,8 +27,8 @@ class CRUDPizzaMenu(object):
     @create_async_session
     async def delete(pizzaMenu_id: int, session: AsyncSession = None) -> None:
         await session.execute(
-            delete(PizzaMenu)
-            .where(PizzaMenu.id == pizzaMenu_id)
+            delete(Menu)
+            .where(Menu.id == pizzaMenu_id)
         )
         await session.commit()
 
@@ -37,27 +37,35 @@ class CRUDPizzaMenu(object):
     async def get(pizzaMenu_id: int = None,
                   session: AsyncSession = None) -> PizzaMenuSchemaInDBSchema | None:
         pizzas = await session.execute(
-            select(PizzaMenu)
-            .where(PizzaMenu.id == pizzaMenu_id)
+            select(Menu)
+            .where(Menu.id == pizzaMenu_id)
         )
         if pizzas_menu := pizzas.first():
             return PizzaMenuSchemaInDBSchema(**pizzas_menu[0].__dict__)
 
     @staticmethod
     @create_async_session
-    async def get_all(session: AsyncSession = None) -> list[PizzaMenuSchemaInDBSchema]:
-        pizzas = await session.execute(
-            select(PizzaMenu)
-            .order_by(PizzaMenu.id)
-        )
+    async def get_all(position: bool = None,
+                      session: AsyncSession = None) -> list[PizzaMenuSchemaInDBSchema]:
+        if position:
+            position = None
+            pizzas = await session.execute(
+                select(Menu)
+                .where(Menu.parent_id == position)
+            )
+        else:
+            pizzas = await session.execute(
+                select(Menu)
+                .order_by(Menu.id)
+            )
         return [PizzaMenuSchemaInDBSchema(**pizzaMenu[0].__dict__) for pizzaMenu in pizzas]
 
     @staticmethod
     @create_async_session
     async def update(pizzaMenu: PizzaMenuSchemaInDBSchema, session: AsyncSession = None) -> None:
         await session.execute(
-            update(PizzaMenu)
-            .where(PizzaMenu.id == pizzaMenu.id)
+            update(Menu)
+            .where(Menu.id == pizzaMenu.id)
             .values(**pizzaMenu.dict())
         )
         await session.commit()
