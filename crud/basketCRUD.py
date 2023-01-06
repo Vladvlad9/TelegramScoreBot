@@ -25,12 +25,19 @@ class CRUDBasket(object):
 
     @staticmethod
     @create_async_session
-    async def delete(basket_id: int, session: AsyncSession = None) -> None:
-        await session.execute(
-            delete(Basket)
-            .where(Basket.id == basket_id)
-        )
-        await session.commit()
+    async def delete(basket_id: int = None, user_id: int = None, session: AsyncSession = None) -> None:
+        if user_id:
+            await session.execute(
+                delete(Basket)
+                .where(Basket.user_id == user_id)
+            )
+            await session.commit()
+        else:
+            await session.execute(
+                delete(Basket)
+                .where(Basket.id == basket_id)
+            )
+            await session.commit()
 
     @staticmethod
     @create_async_session
@@ -38,16 +45,22 @@ class CRUDBasket(object):
                   user_id: int = None,
                   parent_id: int = None,
                   menu_id: int = None,
+                  position_id: int = None,
                   session: AsyncSession = None) -> BasketInDBSchema | None:
         if user_id:
             baskets = await session.execute(
                 select(Basket)
                 .where(Basket.user_id == user_id)
             )
-        if parent_id:
+        elif parent_id:
             baskets = await session.execute(
                 select(Basket)
                 .where(Basket.parent_id == parent_id, and_(Basket.menu_id == menu_id))
+            )
+        elif position_id:
+            baskets = await session.execute(
+                select(Basket)
+                .where(Basket.id == position_id)
             )
         else:
             baskets = await session.execute(

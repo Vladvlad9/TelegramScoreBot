@@ -2,7 +2,9 @@ from aiogram import types
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.dispatcher.storage import FSMContext
 from aiogram.utils.exceptions import BadRequest
+from aiogram.types import ContentType
 
+from crud import CRUDBasket
 from crud.menuCRUD import CRUDPizzaMenu
 from keyboards.inline.users.mainPageIKB import MainPage_CB, Main
 from loader import dp, bot
@@ -80,3 +82,22 @@ async def process_callback(callback: types.CallbackQuery, state: FSMContext = No
 @dp.message_handler(state=MainState.all_states, content_types=["text", "contact"])
 async def process_message(message: types.Message, state: FSMContext = None):
     await Main.process_profile(message=message, state=state)
+
+
+@dp.pre_checkout_query_handler(lambda query: True)
+async def process_pre_checkout_query(pre_checkout_query: types.PreCheckoutQuery):
+    await bot.answer_pre_checkout_query(pre_checkout_query_id=pre_checkout_query.id,
+                                        ok=True)
+
+
+@dp.message_handler(content_types=ContentType.SUCCESSFUL_PAYMENT)
+async def process_successful_payment(message: types.Message):
+    try:
+        await CRUDBasket.delete(user_id=message.from_user.id)
+        await message.delete()
+        await message.answer(text=f"Оплата прошла успешна успешно!\n",
+                             reply_markup=await Main.start_ikb())
+    except Exception as e:
+        print(e)
+        await message.answer(text=f"Оплата прошла успешна успешно!\n",
+                             reply_markup=await Main.start_ikb())

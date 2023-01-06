@@ -1,6 +1,7 @@
 from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, Message, ReplyKeyboardMarkup, \
     KeyboardButton
+from aiogram import types
 from aiogram.utils.exceptions import BadRequest
 from aiogram.types.web_app_info import WebAppInfo
 
@@ -19,7 +20,7 @@ MainPage_CB = CallbackData("MainPage", "target", "action", "id", "editId", "newI
 class Main:
 
     @staticmethod
-    async def back_ikb(target: str, menu_id: int, parent_id: int, action: str = None):
+    async def back_ikb(target: str, menu_id: int = 0, parent_id: int = 0, action: str = None):
         return InlineKeyboardMarkup(
             inline_keyboard=[
                 [
@@ -53,7 +54,7 @@ class Main:
         )
 
     @staticmethod  # Меню с выбором блюд
-    async def menu_ikb(target: str, target_back: str) -> InlineKeyboardMarkup:
+    async def menu_ikb() -> InlineKeyboardMarkup:
 
 
         """
@@ -311,12 +312,28 @@ class Main:
             inline_keyboard=[
                 [
                     InlineKeyboardButton(text=basket,
-                                         callback_data=MainPage_CB.new(basket_menu['target'], basket_menu['target'],
+                                         callback_data=MainPage_CB.new(basket_menu['target'], basket_menu['action'],
                                                                        0, 0, 0)
                                          )
                 ] for basket, basket_menu in data_basket.items()
             ]
         )
+
+    @staticmethod
+    async def editBasket():
+        get_products = await CRUDBasket.get_all()
+        urlkb = InlineKeyboardMarkup(row_width=3)
+        for i in get_products:
+            product = await CRUDPizzaMenu.get(menu_id=i.menu_id, parent_id=i.parent_id)
+            urlkb.add(
+                InlineKeyboardButton(text=product.name, callback_data=MainPage_CB.new("", "", i.id, i.parent_id, 0)),
+                InlineKeyboardButton(text=f"✏ Кол.- {str(i.count)} ️",
+                                     callback_data=MainPage_CB.new("Basket", "EditCountPosition", i.id, i.parent_id, 0)),
+                InlineKeyboardButton(text="❌ Удалить ",
+                                     callback_data=MainPage_CB.new("Basket", "DeletePosition", i.id, i.parent_id, 0)))
+        urlkb.add(InlineKeyboardButton(text="◀️ Назад",
+                                       callback_data=MainPage_CB.new("Basket", "show", 0, 0, 0)))
+        return urlkb
 
     @staticmethod
     async def process_profile(callback: CallbackQuery = None, message: Message = None,
@@ -332,8 +349,7 @@ class Main:
                 elif data.get("target") == "Catalog":
                     if data.get("action") == "show":
                         await callback.message.edit_text(text="Меню",
-                                                         reply_markup=await Main.menu_ikb(target="Catalog",
-                                                                                          target_back="MainMenu"))
+                                                         reply_markup=await Main.menu_ikb())
                     elif data.get("action") == "PositionMenu":
                         await callback.message.delete()
                         get_id = int(data.get("id"))
@@ -344,8 +360,7 @@ class Main:
                     elif data.get("action") == "BackCatalog":
                         await callback.message.delete()
                         await callback.message.answer(text="Меню",
-                                                      reply_markup=await Main.menu_ikb(target="Catalog",
-                                                                                       target_back="MainMenu")
+                                                      reply_markup=await Main.menu_ikb()
                                                       )
 
                 elif data.get('target') == "Filter":
@@ -459,30 +474,76 @@ class Main:
 
                     elif data.get("action") == "BackPizza":
                         await callback.message.edit_text(text="Меню",
-                                                         reply_markup=await Main.menu_ikb(target="Catalog",
-                                                                                          target_back="MainMenu"))
+                                                         reply_markup=await Main.menu_ikb())
 
                 elif data.get("target") == "Basket":
-                    get_basket = await CRUDBasket.get_all(user_id=callback.from_user.id)
-                    if get_basket:
-                        result = "🛒 Список товаров в корзине:\n\n"
+                    if data.get("action") == "show":
+                        get_basket = await CRUDBasket.get_all(user_id=callback.from_user.id)
+                        if get_basket:
+                            result = "🛒 Список товаров в корзине:\n\n"
+                            pay = 0
 
-                        for value in get_basket:
-                            pizza = await CRUDPizzaMenu.get(menu_id=value.menu_id, parent_id=value.parent_id)
-                            result += f"Название - {pizza.name}\n" \
-                                      f"Колличество - {value.count}\n" \
-                                      f"Цена - {float(pizza.price) * float(value.count)}\n" \
-                                      f"{'_' * 25}\n\n"
+                            for value in get_basket:
+                                pizza = await CRUDPizzaMenu.get(menu_id=value.menu_id, parent_id=value.parent_id)
+                                result += f"Название - {pizza.name}\n" \
+                                          f"Колличество - {value.count}\n" \
+                                          f"Цена - {float(pizza.price) * float(value.count)}\n" \
+                                          f"{'_' * 25}\n\n"
+                                pay += float(pizza.price) * float(value.count)
 
-                        await callback.message.edit_text(text=result,
-                                                         reply_markup=await Main.basket_ikb())
-                    else:
-                        await callback.message.edit_text("У вас в корзине отсутствуют товары",
-                                                         reply_markup=await Main.back_ikb(target="MainMenu",
-                                                                                          action=str(0),
-                                                                                          parent_id=0,
-                                                                                          menu_id=0)
-                                                         )
+                            await callback.message.edit_text(text=f"{result}\n\n Общая стоимость - {pay}р.",
+                                                             reply_markup=await Main.basket_ikb())
+                        else:
+                            await callback.message.edit_text("У вас в корзине отсутствуют товары",
+                                                             reply_markup=await Main.back_ikb(target="MainMenu",
+                                                                                              action=str(0),
+                                                                                              parent_id=0,
+                                                                                              menu_id=0)
+                                                             )
+
+                    elif data.get('action') == "EditBasket":
+                        await callback.message.edit_text(text="Форма редактирования",
+                                                         reply_markup=await Main.editBasket())
+
+                    elif data.get('action') == "EditCountPosition":
+                        get_menu = int(data.get('id'))
+                        get_parent = int(data.get('editId'))
+
+                    elif data.get('action') == "DeletePosition":
+                        position_id = int(data.get('id'))
+                        get_parent = int(data.get('editId'))
+
+                        product = await CRUDBasket.get(position_id=position_id)
+                        get_menu = await CRUDPizzaMenu.get(menu_id=product.menu_id, parent_id=product.parent_id)
+                        await CRUDBasket.delete(basket_id=product.id)
+                        await callback.message.edit_text(text=f"{get_menu.name} - успешно удален",
+                                                         reply_markup=await Main.editBasket())
+
+                    elif data.get('action') == "PayBasket":
+                        basket_user = await CRUDBasket.get_all(user_id=callback.from_user.id)
+                        name_product = ""
+                        price_product = 0
+                        for basket in basket_user:
+                            get_product = await CRUDPizzaMenu.get(menu_id=basket.menu_id, parent_id=basket.parent_id)
+                            name_product += f"{get_product.name}\n"
+                            price_product += float(get_product.price) * basket.count
+                        rus_rub = float(26.22)
+
+                        amount = price_product * rus_rub * 1000
+                        a = (amount / rus_rub)
+
+                        price = types.LabeledPrice(label='Оплата товара!', amount=int(a))
+                        await callback.message.delete()
+                        await bot.send_invoice(chat_id=callback.message.chat.id,
+                                               title=f"Оплата товара \n{name_product}\n",
+                                               description=f"Оплатить товары\n{name_product}",
+                                               provider_token=CONFIG.PAYTOKEN,
+                                               currency='RUB',
+                                               is_flexible=False,
+                                               prices=[price],
+                                               start_parameter='time-machine-example',
+                                               payload='some-invoice-payload-for-our-internal-use'
+                                               )
 
                 elif data.get("target") == "Contacts":
 

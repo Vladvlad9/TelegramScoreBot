@@ -18,3 +18,4 @@ class ConfigSchema(BaseModel):
     BOT: BotSchema
     DATABASE: str
     SUPPORT: SupportSchema
+    PAYTOKEN: str

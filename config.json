@@ -10,6 +10,7 @@
     "DISCORD": "123",
     "TELEGRAM": "ulad_islau"
   },
-  "DATABASE": "postgres:postgres@localhost:5432/pizzaShop"
+  "DATABASE": "postgres:postgres@localhost:5432/pizzaShop",
+  "PAYTOKEN": "381764678:TEST:47998"
 
 }
