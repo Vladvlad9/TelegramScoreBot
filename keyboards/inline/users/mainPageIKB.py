@@ -336,6 +336,28 @@ class Main:
         return urlkb
 
     @staticmethod
+    async def addBasket_ikb(menu_id: int = None, parent_id: int = None):
+        """
+                        Клаиатура когда пользователь добавил товар в корзину
+                        :return:
+                        """
+        data_basket = {
+            "Главное меню": {"target": "MainMenu", "action": ""},
+            "🛒 Корзина": {"target": "Basket", "action": "show"},
+            "◀️ Назад": {"target": "DescriptionPizza", "action": "ShowAll"},
+        }
+        return InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(text=basket,
+                                         callback_data=MainPage_CB.new(basket_menu['target'], basket_menu['action'],
+                                                                       parent_id, menu_id, 0)
+                                         )
+                ] for basket, basket_menu in data_basket.items()
+            ]
+        )
+
+    @staticmethod
     async def process_profile(callback: CallbackQuery = None, message: Message = None,
                               state: FSMContext = None) -> None:
         if callback:
@@ -353,7 +375,8 @@ class Main:
                     elif data.get("action") == "PositionMenu":
                         await callback.message.delete()
                         get_id = int(data.get("id"))
-                        await callback.message.answer(text="Пицца",
+                        get_position = await CRUDPositionMenu.get(position_menu_id=get_id)
+                        await callback.message.answer(text=get_position.name,
                                                       reply_markup=await Main.search_ikb(target_back="BackPizza",
                                                                                          position_id=get_id))
 
@@ -374,18 +397,22 @@ class Main:
                         try:
                             get_position_id = int(data.get('id'))
                             data_pizzaMenu = await CRUDPizzaMenu.get_all(position_id=get_position_id)
-                            await callback.message.delete()
-                            # await callback.message.answer_photo(photo=photo.decode('UTF-8'))
-                            await callback.message.answer_photo(photo=data_pizzaMenu[0].photo.decode('UTF-8'),
-                                                                caption=f"Название: <b>{data_pizzaMenu[0].name}</b>\n\n"
-                                                                        f"Описание: <b>{data_pizzaMenu[0].description}</b>",
-                                                                reply_markup=await Main.description_pizza_ikb(
-                                                                    target_back="Pizza",
-                                                                    pizza_id=int(data_pizzaMenu[0].id, ),
-                                                                    count=1,
-                                                                    parent_id=get_position_id
-                                                                ),
-                                                                parse_mode="HTML")
+                            if data_pizzaMenu:
+                                await callback.message.delete()
+                                # await callback.message.answer_photo(photo=photo.decode('UTF-8'))
+                                await callback.message.answer_photo(photo=data_pizzaMenu[0].photo.decode('UTF-8'),
+                                                                    caption=f"Название: <b>{data_pizzaMenu[0].name}</b>\n\n"
+                                                                            f"Описание: <b>{data_pizzaMenu[0].description}</b>",
+                                                                    reply_markup=await Main.description_pizza_ikb(
+                                                                        target_back="Pizza",
+                                                                        pizza_id=int(data_pizzaMenu[0].id, ),
+                                                                        count=1,
+                                                                        parent_id=get_position_id
+                                                                    ),
+                                                                    parse_mode="HTML")
+                            else:
+                                await callback.message.edit_text(text="Блюда временно отсутствуют",
+                                                                 reply_markup=await Main.menu_ikb())
                         except Exception as e:
                             print(e)
                             await callback.message.edit_text(text="Главная страница",
@@ -467,10 +494,9 @@ class Main:
                                                                      user_id=int(callback.from_user.id))
                                                  )
                         await callback.message.edit_text("Вы успешно добавили товар в Корзину",
-                                                         reply_markup=await Main.back_ikb(target="DescriptionPizza",
-                                                                                          action="ShowAll",
-                                                                                          menu_id=current_menu_id,
-                                                                                          parent_id=parent_id))
+                                                         reply_markup=await Main.addBasket_ikb(menu_id=current_menu_id,
+                                                                                               parent_id=parent_id)
+                                                         )
 
                     elif data.get("action") == "BackPizza":
                         await callback.message.edit_text(text="Меню",
@@ -562,6 +588,18 @@ class Main:
                                                      parse_mode="HTML",
                                                      disable_web_page_preview=True
                                                      )
+
+                elif data.get('target') == "FAQ":
+                    if data.get('action') == "show":
+                        text = "1.<b>Что бы воспользоваться тестовой карточко введите</b>\n" \
+                               "Номер - 111 1111 111 1026\n" \
+                               "Дата  - 12/22\n" \
+                               "CVC   - 000"
+                        await callback.message.edit_text(text=text,
+                                                         reply_markup=await Main.back_ikb(target="MainMenu",
+                                                                                          action="show"),
+                                                         parse_mode="HTML"
+                                                         )
 
         if message:
             await message.delete()
