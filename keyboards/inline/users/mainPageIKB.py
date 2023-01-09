@@ -373,7 +373,7 @@ class Main:
                         await callback.message.edit_text(text="Меню",
                                                          reply_markup=await Main.menu_ikb())
                     elif data.get("action") == "PositionMenu":
-                        await callback.message.delete()
+                        #await callback.message.delete()
                         get_id = int(data.get("id"))
                         get_position = await CRUDPositionMenu.get(position_menu_id=get_id)
                         await callback.message.answer(text=get_position.name,
