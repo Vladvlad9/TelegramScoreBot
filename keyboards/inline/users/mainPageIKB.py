@@ -88,7 +88,6 @@ class Main:
     @staticmethod  # Выбор действия при нажатии на меню
     async def search_ikb(target_back: str, position_id: int) -> InlineKeyboardMarkup:
         data_search = {
-            "Фильтр": "Filter",
             "👀 Показать все": "ShowAll",
             "◀️ Назад": target_back
         }
@@ -373,9 +372,10 @@ class Main:
                         await callback.message.edit_text(text="Меню",
                                                          reply_markup=await Main.menu_ikb())
                     elif data.get("action") == "PositionMenu":
-                        #await callback.message.delete()
+
                         get_id = int(data.get("id"))
                         get_position = await CRUDPositionMenu.get(position_menu_id=get_id)
+                        await callback.message.delete()
                         await callback.message.answer(text=get_position.name,
                                                       reply_markup=await Main.search_ikb(target_back="BackPizza",
                                                                                          position_id=get_id))
@@ -415,9 +415,9 @@ class Main:
                                                                  reply_markup=await Main.menu_ikb())
                         except Exception as e:
                             print(e)
-                            await callback.message.edit_text(text="Главная страница",
-                                                             reply_markup=await Main.start_ikb()
-                                                             )
+                            await callback.message.answer(text="Главная страница",
+                                                          reply_markup=await Main.start_ikb()
+                                                          )
 
                     elif data.get("action") == "PaginationPizza":
                         page = int(data.get('id'))
