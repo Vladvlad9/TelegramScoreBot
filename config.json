@@ -10,7 +10,7 @@
     "DISCORD": "123",
     "TELEGRAM": "ulad_islau"
   },
-  "DATABASE": "root:postgres@localhost:5432/sarafan",
+  "DATABASE": "root:postgres@localhost:5432/telegramshop",
   "PAYTOKEN": "381764678:TEST:47998"
 
 }
