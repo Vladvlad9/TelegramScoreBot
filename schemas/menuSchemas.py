@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 class PizzaMenuSchema(BaseModel):
     parent_id: int = Field(ge=1, default=None)
-    photo: bytes
+    photo: str
     description: str = Field(default="Нет описания")
     name: str = Field(default=None)
     type_id: int = Field(ge=1)

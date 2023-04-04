@@ -13,7 +13,7 @@ class Menu(Base):
     id = Column(Integer, primary_key=True)
     parent_id = Column(Integer)
     name = Column(Text)
-    photo = Column(BYTEA)
+    photo = Column(Text)
     type_id = Column(Integer, ForeignKey("types.id", ondelete="NO ACTION"))
     price = Column(Text)
     size_id = Column(Integer, ForeignKey("sizes.id", ondelete="NO ACTION"))

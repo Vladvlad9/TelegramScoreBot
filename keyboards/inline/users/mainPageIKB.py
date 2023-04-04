@@ -55,8 +55,6 @@ class Main:
 
     @staticmethod  # Меню с выбором блюд
     async def menu_ikb() -> InlineKeyboardMarkup:
-
-
         """
         Клаиатура меню
         :return:
@@ -400,7 +398,8 @@ class Main:
                             if data_pizzaMenu:
                                 await callback.message.delete()
                                 # await callback.message.answer_photo(photo=photo.decode('UTF-8'))
-                                await callback.message.answer_photo(photo=data_pizzaMenu[0].photo.decode('UTF-8'),
+                                photo = open(f'product_pictures/{data_pizzaMenu[0].photo}.jpg', 'rb')
+                                await callback.message.answer_photo(photo=photo,
                                                                     caption=f"Название: <b>{data_pizzaMenu[0].name}</b>\n\n"
                                                                             f"Описание: <b>{data_pizzaMenu[0].description}</b>",
                                                                     reply_markup=await Main.description_pizza_ikb(
@@ -425,7 +424,8 @@ class Main:
 
                         data_pizzaMenu = await CRUDPizzaMenu.get_all(position_id=get_parent_id)
                         await callback.message.delete()
-                        await callback.message.answer_photo(photo=data_pizzaMenu[page].photo.decode('UTF-8'),
+                        photo = open(f'product_pictures/{data_pizzaMenu[page].photo}.jpg', 'rb')
+                        await callback.message.answer_photo(photo=photo,
                                                             caption=f"Название: <b>{data_pizzaMenu[page].name}</b>\n\n"
                                                                     f"Описание: <b>{data_pizzaMenu[page].description}</b>",
                                                             reply_markup=await Main.description_pizza_ikb(
@@ -465,7 +465,8 @@ class Main:
 
                         pizza = await CRUDPizzaMenu.get(menu_id=page, parent_id=parent_id)
                         await callback.message.delete()
-                        await callback.message.answer_photo(photo=pizza.photo.decode('UTF-8'),
+                        photo = open(f'product_pictures/{pizza.photo}.jpg', 'rb')
+                        await callback.message.answer_photo(photo=photo,
                                                             caption=f"Название: <b>{pizza.name}</b>\n\n"
                                                                     f"Описание: <b>{pizza.description}</b>",
                                                             reply_markup=await Main.description_pizza_ikb(
@@ -559,7 +560,7 @@ class Main:
                         a = (amount / rus_rub)
 
                         price = types.LabeledPrice(label='Оплата товара!', amount=int(a))
-                        await callback.message.delete()
+                        #await callback.message.delete()
                         await bot.send_invoice(chat_id=callback.message.chat.id,
                                                title=f"Оплата товара \n{name_product}\n",
                                                description=f"Оплатить товары\n{name_product}",

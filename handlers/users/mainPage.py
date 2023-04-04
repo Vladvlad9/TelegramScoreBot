@@ -2,7 +2,7 @@ from aiogram import types
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.dispatcher.storage import FSMContext
 from aiogram.utils.exceptions import BadRequest
-from aiogram.types import ContentType
+from aiogram.types import ContentType, InlineKeyboardMarkup, InlineKeyboardButton, Message, CallbackQuery
 
 from crud import CRUDBasket
 from crud.menuCRUD import CRUDPizzaMenu
@@ -10,7 +10,6 @@ from keyboards.inline.users.mainPageIKB import MainPage_CB, Main
 from loader import dp, bot
 from schemas import PizzaMenuSchema
 from states.users import MainState
-
 
 
 class FSMAdmin(StatesGroup):
@@ -30,8 +29,16 @@ async def cm_start(message: types.Message):
 
 @dp.message_handler(content_types=['photo'], state=FSMAdmin.photo)
 async def load_photo(message: types.Message, state: FSMContext):
+    get_photo = await bot.get_file(message.photo[len(message.photo) - 1].file_id)
+    photo_id = message.photo[0].file_id
+
+    await bot.download_file(file_path=get_photo.file_path,
+                            destination=f'product_pictures/{photo_id}.jpg',
+                            timeout=12,
+                            chunk_size=1215000)
+
     async with state.proxy() as data:
-        data['photo'] = bytes(message.photo[0].file_id.encode("utf-8"))
+        data['photo'] = photo_id
     await FSMAdmin.next()
     await message.reply("Введи Название")
 
@@ -61,7 +68,9 @@ async def load_price(message: types.Message, state: FSMContext):
     asd['type_id'] = 1
     asd['size_id'] = 1
     asd['parent_id'] = 2
-
+    # g = await CRUDPizzaMenu.get(menu_id=2, parent_id=1)
+    # g.photo = asd['photo']
+    # b = await CRUDPizzaMenu.update(pizzaMenu=g)
     a = await CRUDPizzaMenu.add(pizzaMenu=PizzaMenuSchema(**asd))
     await state.finish()
 

@@ -1,6 +1,6 @@
 {
   "BOT": {
-    "TOKEN": "5916939036:AAEHtCs6P_cgp7_dfw4kGGTf1LJX5PvnJ3I",
+    "TOKEN": "5916939036:AAGWYHJgkIhgUFIe7kusDUqWcikztOcr51A",
     "ADMINS": [381252111]
   },
   "SUPPORT": {
@@ -10,7 +10,7 @@
     "DISCORD": "123",
     "TELEGRAM": "ulad_islau"
   },
-  "DATABASE": "root:postgres@localhost:5432/telegramshop",
-  "PAYTOKEN": "381764678:TEST:47998"
+  "DATABASE": "postgres:postgres@localhost:5432/pizzaShop",
+  "PAYTOKEN": "381764678:TEST:53914"
 
 }
